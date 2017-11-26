@@ -103,9 +103,11 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     """
     # TODO: Implement function
     for _ in range(epochs):
-        for image, labels in get_batches_fn(batch_size):
+        for images, labels in get_batches_fn(batch_size):
+            #print (">",images)
+            #print (">",labels.shape)
             __, loss = sess.run([train_op, cross_entropy_loss],
-                    feed_dict = {input_image:image, correct_label:labels, keep_prob: 0.25, learning_rate: 1e-4})
+                    feed_dict = {input_image:images, correct_label:labels, keep_prob:0.25, learning_rate:1e-4})
             print ('loss: %f' %(loss))
 
 tests.test_train_nn(train_nn)
@@ -141,13 +143,13 @@ def run():
         output_layer = layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes)
 
         learning_rate = tf.placeholder(tf.float32)
-        keep_prob = tf.placeholder(tf.float32)
-        input_placeholder = tf.placeholder(tf.float32, shape=(batch_size, image_shape[0], image_shape[1]))
-        labels_placeholder = tf.placeholder(tf.float32, shape=(batch_size, image_shape[0], image_shape[1]))
+        labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size, image_shape[0], image_shape[1], 2))
 
         logits, train_op, cross_entropy_loss = optimize(output_layer, labels_placeholder, learning_rate, num_classes)
         # TODO: Train NN using the train_nn function
-        train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_placeholder, keep_prob, learning_rate)
+        init_op = tf.global_variables_initializer()
+        sess.run(init_op)
+        train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, image_input, labels_placeholder, keep_prob, learning_rate)
 
         # TODO: Save inference data using helper.save_inference_samples
         helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
