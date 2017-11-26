@@ -107,7 +107,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             #print (">",images)
             #print (">",labels.shape)
             __, loss = sess.run([train_op, cross_entropy_loss],
-                    feed_dict = {input_image:images, correct_label:labels, keep_prob:0.25, learning_rate:1e-4})
+                    feed_dict = {input_image:images, correct_label:labels, keep_prob:0.75, learning_rate:1e-4})
             print ('loss: %f' %(loss))
 
 tests.test_train_nn(train_nn)
@@ -138,7 +138,7 @@ def run():
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
-        # TODO: Build NN using load_vgg, layers, and optimize function
+        # Build NN using load_vgg, layers, and optimize function
         image_input, keep_prob, vgg_layer3_out, vgg_layer4_out, vgg_layer7_out = load_vgg(sess, vgg_path)
         output_layer = layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes)
 
@@ -146,13 +146,14 @@ def run():
         labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size, image_shape[0], image_shape[1], 2))
 
         logits, train_op, cross_entropy_loss = optimize(output_layer, labels_placeholder, learning_rate, num_classes)
-        # TODO: Train NN using the train_nn function
+
+        # Train NN using the train_nn function
         init_op = tf.global_variables_initializer()
         sess.run(init_op)
         train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, image_input, labels_placeholder, keep_prob, learning_rate)
 
-        # TODO: Save inference data using helper.save_inference_samples
-        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        # Save inference data using helper.save_inference_samples
+        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, image_input)
 
         # OPTIONAL: Apply the trained model to a video
 
