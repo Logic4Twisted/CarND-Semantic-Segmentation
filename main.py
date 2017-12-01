@@ -55,15 +55,15 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # TODO: Implement function
-    conv1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, strides=(1,1), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3))
-    out_layer1 = tf.layers.conv2d_transpose(conv1x1, num_classes, 4, strides=(2, 2), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3))
-    vgg_layer4_out_flatten = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, strides=(1,1), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3))
+    conv1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, strides=(1,1), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3), kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
+    out_layer1 = tf.layers.conv2d_transpose(conv1x1, num_classes, 4, strides=(2, 2), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3), kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
+    vgg_layer4_out_flatten = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, strides=(1,1), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3), kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
     out_layer2 = tf.add(out_layer1, vgg_layer4_out_flatten)
 
-    out_layer3 = tf.layers.conv2d_transpose(out_layer2, num_classes, 4, strides=(2, 2), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3))
-    vgg_layer3_out_flatten = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, strides=(1,1), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3))
+    out_layer3 = tf.layers.conv2d_transpose(out_layer2, num_classes, 4, strides=(2, 2), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3), kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
+    vgg_layer3_out_flatten = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, strides=(1,1), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3), kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
     out_layer4 = tf.add(out_layer3, vgg_layer3_out_flatten)
-    out_layer5 = tf.layers.conv2d_transpose(out_layer4, num_classes, 16, strides=(8, 8), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3))
+    out_layer5 = tf.layers.conv2d_transpose(out_layer4, num_classes, 16, strides=(8, 8), padding='same', kernel_regularizer=tf.contrib.layers.l2_regularizer(1.0e-3), kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
     return out_layer5
 tests.test_layers(layers)
 
@@ -109,6 +109,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             __, loss = sess.run([train_op, cross_entropy_loss],
                     feed_dict = {input_image:images, correct_label:labels, keep_prob:0.75, learning_rate:1e-4})
             print ('loss: %f' %(loss))
+        print ('*'*50)
 
 tests.test_train_nn(train_nn)
 
@@ -119,8 +120,8 @@ def run():
     data_dir = './data'
     runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
-    epochs = 6
-    batch_size = 5
+    epochs = 20
+    batch_size = 10
 
     # Download pretrained vgg model
     helper.maybe_download_pretrained_vgg(data_dir)
